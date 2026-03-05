@@ -2,9 +2,9 @@
 name: web3-data
 description: >
   Explore Web3 on-chain data using Chainbase APIs. Use this skill when the user asks about
-  blockchain data, token holders, wallet addresses, token prices, NFTs, ENS domains, transactions,
+  blockchain data, token holders, wallet addresses, token prices, ENS domains, transactions,
   DeFi portfolios, or any on-chain analytics. Triggers include: "top holders of", "who holds",
-  "wallet address", "token price", "token transfers", "NFT owners",
+  "wallet address", "token price", "token transfers",
   "ENS domain", "on-chain data", "blockchain query", "SQL query on-chain", or any request
   to look up, analyze, or explore Web3/blockchain data across Ethereum, BSC, Polygon, Arbitrum,
   Optimism, Base, Avalanche, zkSync, and other EVM chains.
@@ -65,21 +65,8 @@ Match user intent to the right CLI command:
 | List of holder addresses | `chainbase token holders <contract>` |
 | Top token holders / who holds a token | `chainbase token top-holders <contract>` |
 | Token transfer history | `chainbase token transfers --contract <addr>` |
-| NFT metadata | `chainbase nft metadata <contract> <token_id>` |
-| NFT collection info | `chainbase nft collection <contract>` |
-| NFT items in collection | `chainbase nft collection-items <contract>` |
-| Search NFTs by name | `chainbase nft search "<name>"` |
-| NFT current owner | `chainbase nft owner <contract> <token_id>` |
-| All NFT owners | `chainbase nft owners <contract>` |
-| NFT owner history | `chainbase nft owner-history <contract> <token_id>` |
-| NFT transfer history | `chainbase nft transfers --contract <addr>` |
-| NFT floor price | `chainbase nft floor-price <contract>` |
-| NFT price history | `chainbase nft price-history <contract> --from <ts> --to <ts>` |
-| Trending NFT collections | `chainbase nft trending` |
-| NFT rarity scores | `chainbase nft rarity <contract>` |
 | Native token balance (ETH/BNB) | `chainbase balance native <address>` |
 | ERC20 token balances of wallet | `chainbase balance tokens <address>` |
-| NFTs owned by wallet | `chainbase balance nfts <address>` |
 | DeFi portfolio positions | `chainbase balance portfolios <address>` |
 | ENS domains held by address | `chainbase domain ens <address>` |
 | ENS name → address | `chainbase domain ens-resolve <name>` |
