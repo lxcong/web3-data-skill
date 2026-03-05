@@ -4,7 +4,7 @@ description: >
   Explore Web3 on-chain data using Chainbase APIs. Use this skill when the user asks about
   blockchain data, token holders, wallet addresses, token prices, NFTs, ENS domains, transactions,
   DeFi portfolios, or any on-chain analytics. Triggers include: "top holders of", "who holds",
-  "wallet address", "address labels", "token price", "token transfers", "NFT owners",
+  "wallet address", "token price", "token transfers", "NFT owners",
   "ENS domain", "on-chain data", "blockchain query", "SQL query on-chain", or any request
   to look up, analyze, or explore Web3/blockchain data across Ethereum, BSC, Polygon, Arbitrum,
   Optimism, Base, Avalanche, zkSync, and other EVM chains.
@@ -12,24 +12,31 @@ description: >
 
 # Web3 Data Explorer (Chainbase)
 
-Query on-chain data via Chainbase Web3 API and SQL API.
+Query on-chain data via the [Chainbase CLI](https://github.com/chainbase-labs/cli).
 
 ## Quick Reference
 
-**API Key**: Use env `CHAINBASE_API_KEY`, falls back to `demo`. If rate-limited, direct user to https://console.chainbase.com to upgrade.
+**Install**: `npm install -g chainbase-cli` (or use `npx chainbase-cli`)
 
-**Script**: `scripts/chainbase.sh <endpoint> [params...]`
+**Auth**: Set API key via `chainbase config set api-key YOUR_KEY`, or env `CHAINBASE_API_KEY`. Falls back to `demo` key. If rate-limited, direct user to https://platform.chainbase.com to get a key.
+
+**x402 Payment**: Supports pay-per-call micropayments via `--x402` flag. Setup: `chainbase config set private-key 0x...`
 
 ```bash
 # Top token holders
-scripts/chainbase.sh /v1/token/top-holders chain_id=1 contract_address=0xdAC17F958D2ee523a2206206994597C13D831ec7 limit=10
+chainbase token top-holders 0xdAC17F958D2ee523a2206206994597C13D831ec7 --chain 1 --limit 10
 
-# Address labels
-scripts/chainbase.sh /v1/address/labels chain_id=1 address=0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045
+# Token price
+chainbase token price 0xdAC17F958D2ee523a2206206994597C13D831ec7
+
+# ENS resolve
+chainbase domain ens-resolve vitalik.eth
 
 # SQL query
-scripts/chainbase.sh /query/execute --sql="SELECT * FROM ethereum.blocks ORDER BY number DESC LIMIT 5"
+chainbase sql execute "SELECT * FROM ethereum.blocks ORDER BY number DESC LIMIT 5"
 ```
+
+Use `--json` for machine-parseable output. Use `--chain <id>` to target a specific chain.
 
 ## Chain IDs
 
@@ -38,34 +45,49 @@ scripts/chainbase.sh /query/execute --sql="SELECT * FROM ethereum.blocks ORDER B
 | Ethereum | 1 | Optimism | 10 |
 | BSC | 56 | Base | 8453 |
 | Polygon | 137 | zkSync | 324 |
-| Avalanche | 43114 | Merlin | 4200 |
-| Arbitrum | 42161 | | |
+| Avalanche | 43114 | Arbitrum | 42161 |
 
-Default to Ethereum (chain_id=1) unless user specifies otherwise.
+Default to Ethereum (chain 1) unless user specifies otherwise.
 
 ## Routing Logic
 
-Match user intent to the right endpoint:
+Match user intent to the right CLI command:
 
-| User wants | Endpoint |
+| User wants | CLI command |
 |---|---|
-| Top token holders / who holds a token | `GET /v1/token/top-holders` |
-| List of holder addresses | `GET /v1/token/holders` |
-| Token price | `GET /v1/token/price` |
-| Historical token price | `GET /v1/token/price/history` |
-| Token info (name, symbol, supply) | `GET /v1/token/metadata` |
-| Token transfer history | `GET /v1/token/transfers` |
-| Address labels/tags | `GET /v1/address/labels` |
-| Wallet transaction history | `GET /v1/account/txs` |
-| Single transaction detail | `GET /v1/tx/detail` |
-| Native token balance (ETH/BNB) | `GET /v1/account/balance` |
-| ERC20 token balances of wallet | `GET /v1/account/tokens` |
-| NFTs owned by wallet | `GET /v1/account/nfts` |
-| DeFi portfolio positions | `GET /v1/account/portfolios` |
-| ENS domain lookup | `GET /v1/ens/records` or `/v1/ens/reverse` |
-| NFT metadata/owner/rarity | `GET /v1/nft/metadata`, `/owner`, `/rarity` |
-| Trending NFT collections | `GET /v1/nft/collection/trending` |
-| **Anything not covered above** | **SQL API** (`POST /query/execute`) |
+| Latest block number | `chainbase block latest` |
+| Block details | `chainbase block detail <number>` |
+| Transaction detail | `chainbase tx detail <hash>` |
+| Wallet transaction history | `chainbase tx list <address>` |
+| Token info (name, symbol, supply) | `chainbase token metadata <contract>` |
+| Token price | `chainbase token price <contract>` |
+| Historical token price | `chainbase token price-history <contract> --from <ts> --to <ts>` |
+| List of holder addresses | `chainbase token holders <contract>` |
+| Top token holders / who holds a token | `chainbase token top-holders <contract>` |
+| Token transfer history | `chainbase token transfers --contract <addr>` |
+| NFT metadata | `chainbase nft metadata <contract> <token_id>` |
+| NFT collection info | `chainbase nft collection <contract>` |
+| NFT items in collection | `chainbase nft collection-items <contract>` |
+| Search NFTs by name | `chainbase nft search "<name>"` |
+| NFT current owner | `chainbase nft owner <contract> <token_id>` |
+| All NFT owners | `chainbase nft owners <contract>` |
+| NFT owner history | `chainbase nft owner-history <contract> <token_id>` |
+| NFT transfer history | `chainbase nft transfers --contract <addr>` |
+| NFT floor price | `chainbase nft floor-price <contract>` |
+| NFT price history | `chainbase nft price-history <contract> --from <ts> --to <ts>` |
+| Trending NFT collections | `chainbase nft trending` |
+| NFT rarity scores | `chainbase nft rarity <contract>` |
+| Native token balance (ETH/BNB) | `chainbase balance native <address>` |
+| ERC20 token balances of wallet | `chainbase balance tokens <address>` |
+| NFTs owned by wallet | `chainbase balance nfts <address>` |
+| DeFi portfolio positions | `chainbase balance portfolios <address>` |
+| ENS domains held by address | `chainbase domain ens <address>` |
+| ENS name → address | `chainbase domain ens-resolve <name>` |
+| Address → ENS name | `chainbase domain ens-reverse <address>` |
+| Space ID resolve (BSC) | `chainbase domain spaceid-resolve <domain>` |
+| Space ID reverse (BSC) | `chainbase domain spaceid-reverse <address>` |
+| Call smart contract function | `chainbase contract call --address <contract> --function "fn" --abi '[...]' --params '[...]'` |
+| **Anything not covered above** | **SQL API**: `chainbase sql execute "SELECT ..."` |
 
 ## Workflow
 
@@ -76,17 +98,29 @@ Match user intent to the right endpoint:
    - WETH: `0xC02aaA39b223FE8D0A0e5c4F27eAD9083C756Cc2` (ETH)
    - DAI: `0x6B175474E89094C44Da98b954EedeAC495271d0F` (ETH)
    - WBTC: `0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599` (ETH)
-   - If unknown, use `GET /v1/token/metadata` or ask the user for the contract address
-3. **Select endpoint** — Use the routing table above; fall back to SQL API for complex/custom queries
-4. **Execute** — Run via `scripts/chainbase.sh` or direct `curl`
+   - If unknown, use `chainbase token metadata <contract>` or ask the user for the contract address
+3. **Select command** — Use the routing table above; fall back to SQL API for complex/custom queries
+4. **Execute** — Run the CLI command. Add `--json` when you need to parse the output programmatically
 5. **Present results** — Format data clearly with tables for lists, highlight key insights
+
+## Global Options
+
+All commands support these options:
+
+| Option | Description | Default |
+|---|---|---|
+| `--chain <id>` | Target chain | `1` (Ethereum) |
+| `--json` | Machine-parseable JSON output | `false` |
+| `--page <n>` | Page number for paginated results | `1` |
+| `--limit <n>` | Results per page | `20` |
+| `--x402` | Enable x402 micropayment mode | `false` |
 
 ## SQL API Fallback
 
-When fixed endpoints don't cover the query, translate user intent to SQL:
+When CLI commands don't cover the query, translate user intent to SQL:
 
 ```bash
-scripts/chainbase.sh /query/execute --sql="SELECT from_address, SUM(value) as total FROM ethereum.token_transfers WHERE contract_address = '0x...' GROUP BY from_address ORDER BY total DESC LIMIT 20"
+chainbase sql execute "SELECT from_address, SUM(value) as total FROM ethereum.token_transfers WHERE contract_address = '0x...' GROUP BY from_address ORDER BY total DESC LIMIT 20"
 ```
 
 Common table patterns (replace `ethereum` with chain name):
@@ -98,4 +132,4 @@ Common table patterns (replace `ethereum` with chain name):
 
 SQL constraints: max 100,000 results per query.
 
-For complete endpoint parameters and response schemas, read [references/api-endpoints.md](references/api-endpoints.md).
+For full command help, run `chainbase --help` or `chainbase <command> --help`.
