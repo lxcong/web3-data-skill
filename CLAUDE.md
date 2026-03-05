@@ -4,34 +4,33 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-web3-data-skill — A Claude Code skill for exploring Web3 on-chain data using Chainbase APIs.
+web3-data-skill — A Claude Code skill for exploring Web3 on-chain data using [Chainbase CLI](https://github.com/chainbase-labs/cli).
 
 ## Structure
 
 ```
 ├── SKILL.md                    # Skill 定义：路由逻辑、工作流、Chain ID 映射
-├── scripts/
-│   └── chainbase.sh            # Chainbase API 调用封装脚本（支持 SQL 异步轮询）
 └── references/
     └── api-endpoints.md        # 完整 API 端点参考文档（38 个端点）
 ```
 
 ## Key Conventions
 
-- API 调用统一通过 `scripts/chainbase.sh` 封装脚本执行
-- 默认使用 `demo` API Key，可通过环境变量 `CHAINBASE_API_KEY` 覆盖
-- 默认链为 Ethereum (chain_id=1)，除非用户指定其他链
-- SQL API 为异步模式，脚本会自动轮询结果
+- 数据查询统一通过 `chainbase` CLI 执行（`npm install -g chainbase-cli`）
+- 默认使用 `demo` API Key，可通过 `chainbase config set api-key` 或环境变量 `CHAINBASE_API_KEY` 覆盖
+- 默认链为 Ethereum (chain 1)，通过 `--chain <id>` 指定其他链
+- 使用 `--json` 获取机器可解析的 JSON 输出
+- SQL API 为异步模式，CLI 会自动轮询结果
 
 ## Testing
 
 ```bash
-# 测试 Web3 API
-scripts/chainbase.sh /v1/token/top-holders chain_id=1 contract_address=0xdAC17F958D2ee523a2206206994597C13D831ec7 limit=3
+# 测试 token 查询
+chainbase token top-holders 0xdAC17F958D2ee523a2206206994597C13D831ec7 --limit 3
 
-# 测试地址标签
-scripts/chainbase.sh /v1/address/labels chain_id=1 address=0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045
+# 测试 ENS 解析
+chainbase domain ens-resolve vitalik.eth
 
 # 测试 SQL API
-scripts/chainbase.sh /query/execute --sql="SELECT * FROM ethereum.blocks LIMIT 1"
+chainbase sql execute "SELECT * FROM ethereum.blocks LIMIT 1"
 ```
