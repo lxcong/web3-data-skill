@@ -1,13 +1,18 @@
 ---
 name: web3-data
 description: >
-  Explore Web3 on-chain data using Chainbase APIs. Use this skill when the user asks about
-  blockchain data, token holders, wallet addresses, token prices, ENS domains, transactions,
-  DeFi portfolios, or any on-chain analytics. Triggers include: "top holders of", "who holds",
-  "wallet address", "token price", "token transfers",
-  "ENS domain", "on-chain data", "blockchain query", "SQL query on-chain", or any request
-  to look up, analyze, or explore Web3/blockchain data across Ethereum, BSC, Polygon, Arbitrum,
-  Optimism, Base, Avalanche, zkSync, and other EVM chains.
+  Two services in one skill:
+  (1) Web3 on-chain data via Chainbase CLI — use when the user asks about blockchain data,
+  token holders, wallet addresses, token prices, ENS domains, transactions, DeFi portfolios,
+  or any on-chain analytics. Triggers: "top holders of", "who holds", "wallet address",
+  "token price", "token transfers", "ENS domain", "on-chain data", "blockchain query",
+  "SQL query on-chain", across Ethereum, BSC, Polygon, Arbitrum, Optimism, Base, Avalanche,
+  zkSync, and other EVM chains.
+  (2) Crypto social intelligence via Tops (chainbase tops) — use when the user asks about
+  trending crypto narratives, social mentions, Twitter/X crypto discussions, narrative
+  discovery, topic heat, or KOL/community signals. Triggers: "trending topics", "crypto
+  narrative", "what's trending in crypto", "social mentions", "who is talking about",
+  "crypto twitter", "KOL signals", "narrative search", "topic posts".
 ---
 
 # Web3 Data Explorer (Chainbase)
@@ -120,3 +125,71 @@ Common table patterns (replace `ethereum` with chain name):
 SQL constraints: max 100,000 results per query.
 
 For full command help, run `chainbase --help` or `chainbase <command> --help`.
+
+---
+
+# Crypto Social Intelligence (Tops)
+
+Query crypto social signals via `chainbase tops`. No API key required — free to use.
+
+**Service:** [Tops](https://tops.chainbase.com) — trending narratives, topic discovery, Twitter/X mentions.
+**Base URL:** `https://api.chainbase.com/tops` (called internally by the CLI)
+**Rate limit:** 10 req/s · 60 req/min · 600 req/hour (per client IP)
+
+## Quick Reference
+
+```bash
+# List trending crypto topics (default: English)
+chainbase tops trending
+chainbase tops trending --language zh   # Chinese
+chainbase tops trending --language ko   # Korean
+
+# Get structured details for a topic
+chainbase tops topic <topic_id>
+
+# Get posts/tweets under a topic
+chainbase tops posts <topic_id>
+
+# Search narrative candidates by keyword
+chainbase tops search "RWA"
+chainbase tops search "AI Agent"
+
+# Search recent Twitter/X mentions
+chainbase tops mentions "Ethereum ETF"
+```
+
+Use `--json` for machine-parseable output.
+
+## Routing Logic
+
+Match user intent to the right subcommand:
+
+| User wants | CLI command |
+|---|---|
+| What's trending in crypto right now | `chainbase tops trending [--language <lang>]` |
+| Details / summary of a specific topic | `chainbase tops topic <topic_id>` |
+| Raw tweets / posts under a topic | `chainbase tops posts <topic_id>` |
+| Find topics related to a narrative keyword | `chainbase tops search <keyword>` |
+| Recent Twitter/X mentions of a project or keyword | `chainbase tops mentions <keyword>` |
+
+## Workflow
+
+### Trend Tracking
+1. `chainbase tops trending` → get current top topics (note `id` fields)
+2. `chainbase tops topic <id>` → dive into summary, keywords, representative tweets
+3. `chainbase tops posts <id>` → retrieve raw tweets for sentiment analysis
+
+### Narrative Discovery
+1. `chainbase tops search <keyword>` → find candidate topics from a vague term
+2. Cluster/summarize candidates, identify the target topic ID
+3. `chainbase tops topic <id>` → confirm topic details
+
+### Real-time Monitoring
+1. `chainbase tops mentions <keyword>` → monitor social mentions of a project/token
+2. Extract stance, sentiment, key voices from results
+
+## Data Schemas
+
+**Story** (topic): `id`, `keyword`, `summary`, `score`, `current_rank`, `rank_status` (`new`/`up`/`down`/`same`), `is_new`, `authors[]`, `tweet_urls[]`, `first_tweet_time`, `snapshot_time`
+
+**Tweet**: `id`, `text`, `media_json`, `user` → `{user_id, name, screen_name, blue_verified, profile_image}`
