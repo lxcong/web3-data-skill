@@ -1,17 +1,32 @@
 # web3-data-skill
 
-A [Claude Code](https://docs.anthropic.com/en/docs/claude-code) skill for exploring Web3 on-chain data using [Chainbase](https://chainbase.com) APIs.
+A [Claude Code](https://docs.anthropic.com/en/docs/claude-code) skill covering two Chainbase services:
+
+| Service | Description |
+|---|---|
+| **Web3 Data** | On-chain data via [Chainbase](https://chainbase.com) APIs — tokens, wallets, DeFi, ENS, SQL |
+| **Tops** | Crypto social intelligence via [Tops](https://tops.chainbase.com) — trending narratives, Twitter/X mentions |
 
 ## Features
 
-- **Token Holders** — Query top holders of any ERC20 token with balance and USD value
-- **Address Labels** — Look up wallet address tags (exchange, KOL, contract deployer, etc.)
+### Web3 On-Chain Data (`chainbase`)
+
+- **Token Holders** — Top holders of any ERC20 token with balance and USD value
 - **Token Data** — Price, metadata, transfer history
-- **NFT Data** — Metadata, owners, floor price, trending collections, rarity
 - **Wallet Analytics** — Balances, transaction history, DeFi portfolios, ENS domains
-- **SQL Queries** — When fixed APIs don't cover your needs, write custom SQL to query any on-chain data
+- **SQL Queries** — Custom SQL against any on-chain data when fixed APIs fall short
 
 Supports Ethereum, BSC, Polygon, Arbitrum, Optimism, Base, Avalanche, zkSync, and more.
+
+### Crypto Social Intelligence (`chainbase tops`)
+
+- **Trending Topics** — Ranked list of current crypto narratives with heat scores
+- **Topic Details** — AI summary, keywords, and representative tweets for any topic
+- **Topic Posts** — Raw tweets under a topic for sentiment/stance analysis
+- **Narrative Search** — Discover topics from a vague keyword (e.g. "RWA", "AI Agent")
+- **Social Mentions** — Recent Twitter/X mentions of any project or keyword
+
+No API key required for Tops — free to use.
 
 ## Install
 
@@ -27,32 +42,36 @@ claude install-skill https://github.com/lxcong/web3-data-skill
 
 ## Usage
 
-Once installed, just ask Claude Code about any Web3 data in natural language:
+Once installed, ask Claude Code in natural language:
 
+**On-chain data:**
 ```
 > USDT 的 top holders 是谁？
 > 查一下 vitalik 的地址标签
 > ETH 上 USDC 最近 24 小时的转账记录
-> 查询 Bored Ape 的地板价
 > 用 SQL 查一下以太坊最近 10 个区块
 ```
 
-## API Key
-
-The skill uses Chainbase's `demo` API key by default. If you hit rate limits, register at [console.chainbase.com](https://console.chainbase.com) and set your key:
-
-```bash
-export CHAINBASE_API_KEY=your_api_key
+**Crypto social intelligence:**
 ```
+> 现在 crypto 最热的 narrative 是什么？
+> Search narrative candidates for "AI Agent"
+> Who is talking about Ethereum ETF on Twitter?
+> Get posts for the top trending topic
+```
+
+## API Keys
+
+- **Web3 Data**: Uses Chainbase `demo` key by default. For higher limits, register at [console.chainbase.com](https://console.chainbase.com) and set `CHAINBASE_API_KEY`.
+- **Tops**: No API key needed. Rate limit: 10 req/s · 60 req/min · 600 req/hour per IP.
 
 ## Structure
 
 ```
-├── SKILL.md                    # Skill definition and routing logic
-├── scripts/
-│   └── chainbase.sh            # API wrapper script (auto-handles SQL async polling)
+├── SKILL.md                    # Skill definition and routing logic (both services)
 └── references/
-    └── api-endpoints.md        # Complete API endpoint reference (38 endpoints)
+    ├── api-endpoints.md        # Chainbase Web3 API reference (38 endpoints)
+    └── tops-api.md             # Tops Social Intelligence API reference
 ```
 
 ## License
